@@ -41,23 +41,21 @@ YMLP has a very basic API.  Authentication is done through SSL & a pre-assigned 
 
 The command we need here is at https://www.ymlp.com/api/Contacts.GetUnsubscribed
 
-<blockquote>
 
 Arguments:
 
 Can be sent as a HTTP GET or HTTP POST call to https://www.ymlp.com/api/Contacts.GetUnsubscribed
 
-    * FieldID: ID of the field or a comma-separated list of field IDs; use Field.GetList() to retrieve the ID for each field (optional; default: return only email addresses)
-    * StartDate: only show contacts that were removed after this date (optional, format: YYYY-MM-DD, e.g.: 2020-05-31)
-    * StopDate: only show contacts that were removed before this date (optional, format: YYYY-MM-DD, e.g.: 2020-05-31)
-    * Page: ID of the result page to show (optional, default: 1)
-    * NumberPerPage: number of contacts per result page (optional, default: 1,000)
-    * Sorting: Sorting order of the returned email addresses, either ascending ('a' first) or descending ('z' first) (optional): Ascending (default) or Descending
-    * Key: your API key is ------------
-    * Username: your username is ------
-    * Output: output format (optional): XML (default), PHP or JSON
+* FieldID: ID of the field or a comma-separated list of field IDs; use Field.GetList() to retrieve the ID for each field (optional; default: return only email addresses)
+* StartDate: only show contacts that were removed after this date (optional, format: YYYY-MM-DD, e.g.: 2020-05-31)
+* StopDate: only show contacts that were removed before this date (optional, format: YYYY-MM-DD, e.g.: 2020-05-31)
+* Page: ID of the result page to show (optional, default: 1)
+* NumberPerPage: number of contacts per result page (optional, default: 1,000)
+* Sorting: Sorting order of the returned email addresses, either ascending ('a' first) or descending ('z' first) (optional): Ascending (default) or Descending
+* Key: your API key is ------------
+* Username: your username is ------
+* Output: output format (optional): XML (default), PHP or JSON
     
-</blockquote>
     
 This gives us back an simple array of emails like
 
@@ -79,6 +77,7 @@ The only way I can see around this is that the auth gets configured _within the 
     @ericgj_rmu ymlp cont.unsub? peewee@gmail.com
     
 That is, a space delimited list of:
+
 1. the Twitter app account
 2. the service name
 3. the 'command' which is service specific;
