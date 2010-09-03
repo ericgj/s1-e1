@@ -1,0 +1,10 @@
+## Basic design plan
+
+The primary library used to read incoming commands is twitter-stream via the Twitter Streaming API.  Twitter-stream runs within an EventMachine loop, and within that loop I have a HTTP client processing commands against YMLP, and another HTTP client writing results via the Twitter REST API (as direct messages).
+
+## Development round 1
+
+Some basic questions have to be answered -
+
+1. Can I get the EM HTTP client working against YMLP?
+2. Can I get the EM HTTP client working against Twitter?
