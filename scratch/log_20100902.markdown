@@ -13,15 +13,20 @@ As I see it there are three basic parts:
 2. The 'data store client' which runs the commands as http requests to YMLP;
 3. The 'output generator' which formats the responses from YMLP and replies to the twitter user who sent the command
 
-One very basic question for the input pieces is what is the mechanism for reading the commands (direct messages)?  I do not want to poll if at all possible: I want to act on push notifications.  For one thing, Twitter has strict limits on polling.  This suggested to me looking at the Streaming API.
+### The input piece
 
-Apparently the ability to receive push notifications for Direct Messages is in beta right now, see [here](http://thenextweb.com/socialmedia/2010/08/30/twitter-launches-site-streams-to-eliminate-rate-limits-for-tweets-about-you/)
+One very basic question is what is the mechanism for reading the commands?  I do not want to poll if at all possible: I want to act on push notifications.  For one thing, Twitter has strict limits on polling, meaning replies are delayed.  For another, polling is lazy and probably contributes to global warming :).  So I looked at the Twitter Streaming API.
 
-There is a very nice basic ruby EventMachine library for consuming Twitter streams (twitter-stream),  hopefully it will be compatible with the new stuff.
+Apparently the ability to receive push notifications for Direct Messages is in beta right now, see [here](http://thenextweb.com/socialmedia/2010/08/30/twitter-launches-site-streams-to-eliminate-rate-limits-for-tweets-about-you/).  This definitely seems meant for industrial strength apps using friending as a user model, but there are a lot of questions about security and anyway it's not open yet.  
 
-OK - so assuming that's sufficient for the 'input' side of things, what about the 'data store' (YMLP) and the 'output' (reply tweet)?
+In the meantime there's an easy workaround: use public reply messages (provided you don't care about direct messages vs public messages, but more about this later): you can consume a stream filtered by the twitter username as a keyword, and just drop any messages ('mentions') that don't have the user as the in-reply-to.
 
-Staying within Twitterland for the moment, the reply would be handled using the standard REST API (`/1/direct_messages/new.json`).  Hopefully using a simple EM http client + oauth.
+There is a very nice basic ruby EventMachine library for consuming Twitter streams (twitter-stream),  presumably it will be compatible with the new stuff.
+
+
+### The output piece
+
+The reply would be handled using the standard REST API, as a direct message (`/1/direct_messages/new.json`).  This gives some measure of security vs a public reply.  Hopefully implemented using a simple EM http client + oauth.
 
 Probably you'd have a queue within the EM for the _parsed incoming commands_. A subscriber proc then pulls off commands, converts them to http requests to YMLP, and listens for a response.
 
@@ -30,5 +35,52 @@ The responses also would be placed on an 'outbound' queue.
 The trick is how to retain a certain amount of state - for instance you need to know in the outbound queue who to reply to, which is determined by data in the input.
 
 
-## The YMLP interface
+## The data store piece
+
+YMLP has a very basic API.  Authentication is done through SSL & a pre-assigned 'API key' + username. 
+
+The command we need here is at https://www.ymlp.com/api/Contacts.GetUnsubscribed
+
+<blockquote>
+
+Arguments:
+
+Can be sent as a HTTP GET or HTTP POST call to https://www.ymlp.com/api/Contacts.GetUnsubscribed
+
+    * FieldID: ID of the field or a comma-separated list of field IDs; use Field.GetList() to retrieve the ID for each field (optional; default: return only email addresses)
+    * StartDate: only show contacts that were removed after this date (optional, format: YYYY-MM-DD, e.g.: 2020-05-31)
+    * StopDate: only show contacts that were removed before this date (optional, format: YYYY-MM-DD, e.g.: 2020-05-31)
+    * Page: ID of the result page to show (optional, default: 1)
+    * NumberPerPage: number of contacts per result page (optional, default: 1,000)
+    * Sorting: Sorting order of the returned email addresses, either ascending ('a' first) or descending ('z' first) (optional): Ascending (default) or Descending
+    * Key: your API key is ------------
+    * Username: your username is ------
+    * Output: output format (optional): XML (default), PHP or JSON
+    
+</blockquote>
+    
+This gives us back an simple array of emails like
+
+    [{"EMAIL" : "someone@example.com"},
+     {"EMAIL" : "someone-else@hates-us.com"}]
+ 
+(Right now I'm not going to worry about edge cases like over 1000 emails unsubscribed.)
+
+    
+## Note about security
+
+Obviously we don't want to pass auth info for YMLP in public tweets.  So I am not so sure YMLP is the best thing to mash up here.  On the other hand, it's a common issue for interacting with any service that requires a login.
+
+The only way I can see around this is that the auth gets configured _within the app_.  Not planning on doing a web front end for this right now so what it means is setting up some config file or command line options.
+
+
+## First draft Twitter command syntax
+
+    @ericgj_rmu ymlp cont.unsub? peewee@gmail.com
+    
+That is, a space delimited list of:
+1. the Twitter app account
+2. the service name
+3. the 'command' which is service specific;
+4. any 'parameters' to the command
 
