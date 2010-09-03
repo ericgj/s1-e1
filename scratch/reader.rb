@@ -3,17 +3,22 @@
 #
 require 'rubygems'
 require 'twitter/json_stream'
+require 'json'
+
+def parse(text)
+  JSON.parse(text)
+end
 
 EventMachine::run {
   stream = Twitter::JSONStream.connect(
     :path => '/1/statuses/filter.json',
-    :auth => 'LOGIN:PASSWORD',
+    :auth => 'ericgj_rmu:rmu4evr!',
     :method => 'POST',
-    :content => 'track=basketball,football,baseball,footy,soccer'
+    :content => 'track=@ericgj_rmu'
   )
     
   stream.each_item do |item|
-    $stdout.print "item: #{item}\n"
+    $stdout.print "item:\n#{JSON.pretty_generate(parse(item))}\n"
     $stdout.flush
   end
   
@@ -32,7 +37,7 @@ EventMachine::run {
     $stdout.flush
   end
   
-  trap('TERM') {
+  trap('INT') {
     stream.stop
     EventMachine.stop if EventMachine.reactor_running?
   }
