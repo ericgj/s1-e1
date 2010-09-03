@@ -1,5 +1,4 @@
 # this is an example usage of twitter/json_stream to read statuses
-# note stream.each_item does not parse the json
 #
 require 'rubygems'
 require 'twitter/json_stream'
