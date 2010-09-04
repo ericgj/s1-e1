@@ -1,5 +1,8 @@
 # this is an example usage of twitter/json_stream to read statuses
 #
+# interestingly, it seems basic auth still works against the Streaming API?
+#
+
 require 'rubygems'
 require 'twitter/json_stream'
 require 'json'
@@ -11,7 +14,7 @@ end
 EventMachine::run {
   stream = Twitter::JSONStream.connect(
     :path => '/1/statuses/filter.json',
-    :auth => 'ericgj_rmu:rmu4evr!',
+    :auth => '',
     :method => 'POST',
     :content => 'track=@ericgj_rmu'
   )

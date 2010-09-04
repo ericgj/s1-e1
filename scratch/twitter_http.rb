@@ -19,10 +19,10 @@ require 'oauth/client/em_http'
 # http://twitter.com/apps/new
 
 # Edit in your details.
-CONSUMER_KEY = "27oxFs7i5wJwMyWqXf2Dw"
-CONSUMER_SECRET = "VUBR3iB1YAn5Bi5CxSY6gnmEqlerwddMVgviP8HCI"
-ACCESS_TOKEN = "186283225-S4e26wfRWggzr9CSZlWGVKHRFZBvZPEKaF63M1HX"
-ACCESS_TOKEN_SECRET = "o4Yiz57j6nuaVFTnzKwu3kUHfXLMRRGRDBX35ZQO4hc"
+CONSUMER_KEY = ""
+CONSUMER_SECRET = ""
+ACCESS_TOKEN = ""
+ACCESS_TOKEN_SECRET = ""
 
 
 def twitter_oauth_consumer

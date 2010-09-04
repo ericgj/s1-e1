@@ -6,8 +6,8 @@ EM.run {
 
   http = EventMachine::HttpRequest.new( 
             'http://www.ymlp.com/api/Contacts.GetUnsubscribed'
-         ).get :query => {'Key' => 'NNGAEPGKUKG2GNHWWJPK',
-                          'Username' => 'ericgj_rmu'
+         ).get :query => {'Key' => '',
+                          'Username' => ''
                          }
          
   http.callback do
