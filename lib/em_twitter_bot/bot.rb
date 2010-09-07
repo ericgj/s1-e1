@@ -41,14 +41,17 @@ EM.run {
       $stdout.print "Received response from YMLP: \n#{response.inspect}\n"
       $stdout.flush
  
-      if response && response.is_a?(Array)
-        sender.send_direct_message( 
-          ( cmd[1..3] + 
-            [':', (response.find {|p| p['EMAIL'] == cmd[3]} ? 'yes' : 'no') ]
-          ).join(' ')
-        )
-      end
+      line1 = if response && response.is_a?(Array)
+                "#{cmd[3]} : #{response.find {|p| p['EMAIL'] == cmd[3]} ? 'yes' : 'no'}"
+              else
+                "#{cmd[3]} : err"
+              end
+      line2 = "##{cmd[1]} #{cmd[2]}"
       
+      sender.send_direct_message( 
+        [line1, line2].join('\n')
+      )
+
     end
   end
   
