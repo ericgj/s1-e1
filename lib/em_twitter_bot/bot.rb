@@ -41,7 +41,7 @@ EM.run {
       $stdout.print "Received response from YMLP: \n#{response.inspect}\n"
       $stdout.flush
  
-      if response && response.respond_to?(:find)
+      if response && response.is_a?(Array)
         sender.send_direct_message( 
           ( cmd[1..3] + 
             [':', (response.find {|p| p['EMAIL'] == cmd[3]} ? 'yes' : 'no') ]
@@ -69,44 +69,3 @@ EM.run {
   
 }
 
-
-__END__
-
-
-  stream = Twitter::CommandStream.track(bot_user, bot_auth)
-  
-  stream.each_command('ymlp', 'cntc.unsub?') do |cmd, sender|
-    $stdout.print "Received command on twitter stream: #{cmd.join(' ')}"
-    $stdout.flush
-    
-    Command::YMLP.new(cmd, ymlp_env).call do |response|
-    
-      $stdout.print "Received response from YMLP: \n#{response.inspect}\n"
-      $stdout.flush
-      
-      if response && response.respond_to?(:find)
-        sender.send_direct_message( 
-          ( cmd[1..3] + 
-            [':', (response.find {|p| p['EMAIL'] == cmd[3]} ? 'yes' : 'no') ]
-          ).join(' ')
-        )
-      end
-      
-    end
-  end
-  
-  stream.unaddressed_command do |raw, user|
-    $stdout.print "Received unaddressed command (or command from the bot itself) from @#{user}: `#{raw}`\n"
-    $stdout.flush
-  end
-  
-  stream.unparseable_command do |raw, user|
-    $stdout.print "Received unparseable command from @#{user}: `#{raw}`\n"
-    $stdout.flush
-  end
-  
-  stream.unroutable_command do |raw, user|
-    $stdout.print "Received unroutable command from @#{user}: `#{raw}`\n"
-    $stdout.flush
-  end
-  
