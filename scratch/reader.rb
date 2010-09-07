@@ -15,6 +15,12 @@ EventMachine::run {
   stream = Twitter::JSONStream.connect(
     :path => '/1/statuses/filter.json',
     :auth => '',
+    #:oauth => {
+    #           :consumer_key    => "",
+    #           :consumer_secret => "",
+    #           :access_key      => "",
+    #           :access_secret   => ""
+    #          },                    
     :method => 'POST',
     :content => 'track=@ericgj_rmu'
   )
