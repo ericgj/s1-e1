@@ -22,7 +22,7 @@ class Twitter
   end
   
   def configure
-    Signal.trap("INT") { "Exiting" } 
+    Signal.trap("INT") { puts "Exited." } 
     write_on_exit = false
 
     puts "Checking Twitter basic auth..."

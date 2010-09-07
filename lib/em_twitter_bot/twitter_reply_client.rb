@@ -13,13 +13,14 @@ module Twitter
 class ReplyClient
   require 'em-http-request'
   require 'oauth'
+  require 'oauth/client/em_http'
   
   TWITTER_URI = 
     { :new_direct_message => 'http://api.twitter.com/1/direct_messages/new.json' }
   
   
   def send_direct_message(text)
-    $stdout.print "Sending direct message:\n  #{text}\n"
+    $stdout.print "Sending direct message to #{@screen_name}:\n#{text}\n"
     $stdout.flush
     
     request = EventMachine::HttpRequest.new(
@@ -34,12 +35,16 @@ class ReplyClient
     end
 
     http.callback do
-      $stdout.print "Posted OK: #{http.response_header.status}\n"
+      if (200..299).include? http.response_header.status.to_i
+        $stdout.print "Post OK: #{http.response_header.status}\n"
+      else
+        $stdout.print "Post error: #{http.response_header.status}\n#{http.response}\n"
+      end
       $stdout.flush
     end
 
     http.errback do
-      $stdout.print "Failed to post: #{http.response_header.status}\n"
+      $stdout.print "Failed to post: #{http.response_header.status}\n#{http.response}\n"
       $stdout.flush
     end    
   end
@@ -51,7 +56,7 @@ class ReplyClient
     @consumer_key = opts[:oauth][:consumer_key]
     @consumer_secret = opts[:oauth][:consumer_secret]
     @access_key = opts[:oauth][:access_key]
-    @access_secret = opts[:oauth][:access_key]
+    @access_secret = opts[:oauth][:access_secret]
   end
   
   protected

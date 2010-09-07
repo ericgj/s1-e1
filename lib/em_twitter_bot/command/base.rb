@@ -67,7 +67,7 @@ class Base
   
   def initialize(*parts)
     parts = parts.flatten
-    @env = parts.last.is_a?(Hash) ? parts.pop : {}
+    @env = parts.last.respond_to?(:[]) ? parts.pop : {}
     @text = parts.shift
     @args = parts
   end

@@ -10,7 +10,12 @@ YMLP_ENV    = Environment::YMLP.load
 
 
 EM.run {
-
+  
+  $stdout.print "---------------\nStarting bot...\n"
+  $stdout.flush
+  
+  Signal.trap("INT") { puts "---------------\nExiting..."; EM.next_tick { EM.stop } }
+  
   stream = Twitter::CommandStream.track(
               TWITTER_ENV['username'], 
               :auth => "#{TWITTER_ENV['username']}:#{TWITTER_ENV['password']}",
@@ -21,6 +26,9 @@ EM.run {
                          :access_secret   => TWITTER_ENV['asecret']
                         }
            )
+  
+  $stdout.print "Listening for commands sent to #{TWITTER_ENV['username']}...\n"
+  $stdout.flush
   
   stream.each_command('ymlp', 'cntc.unsub?') do |cmd, sender|
     $stdout.print "Received command on twitter stream: `#{cmd.join(' ')}`\n"
@@ -36,10 +44,10 @@ EM.run {
               else
                 "#{cmd[3]} : err"
               end
-      line2 = "##{cmd[1]} #{cmd[2]}"
+      line2 = "(##{cmd[1]} #{cmd[2]})"
       
       sender.send_direct_message( 
-        [line1, line2].join('\n')
+        [line1, line2].join('  ')
       )
 
     end
