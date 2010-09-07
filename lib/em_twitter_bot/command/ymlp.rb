@@ -1,8 +1,9 @@
-require 'json'
 
 module Command
 class YMLP < Command::Base
 
+  require 'json'
+  
   COMMAND_MAP = {
     'cntc.unsub?' => 'Contacts.GetUnsubscribed'
   }
@@ -12,8 +13,8 @@ class YMLP < Command::Base
   end
   
   build_query do |c| 
-    {'Key' => c.env['Key'], 
-     'Username' => c.env['Username'],
+    {'Key' => c.env['key'], 
+     'Username' => c.env['username'],
      'Output' => 'JSON'
     }
   end

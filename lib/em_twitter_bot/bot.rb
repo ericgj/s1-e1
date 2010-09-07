@@ -1,42 +1,32 @@
-require 'rubygems'
 require 'eventmachine'
 
 Dir[File.join(File.dirname(__FILE__), 'command', '*.rb')].each do |f|
   require File.join(File.dirname(f), File.basename(f))
 end
 
-# TODO config and auth go here - before EM loop
+# Config and auth go here - before EM loop
+TWITTER_ENV = Environment::Twitter.load
+YMLP_ENV    = Environment::YMLP.load
 
-def bot_user
-  'ericgj_rmu'
-end
-
-def bot_auth
-#  { :oauth => {
-#               :consumer_key    => "",
-#               :consumer_secret => "",
-#               :access_key      => "",
-#               :access_secret   => ""
-#              }
-#  }
-  { :auth => ''}
-end
-
-def ymlp_env
-  { 'Username' => 'ericgj_rmu',
-    'Key' => ''
-  }
-end
 
 EM.run {
 
-  stream = Twitter::CommandStream.track(bot_user, bot_auth)
+  stream = Twitter::CommandStream.track(
+              TWITTER_ENV['username'], 
+              :auth => "#{TWITTER_ENV['username']}:#{TWITTER_ENV['password']}",
+              :oauth => {
+                         :consumer_key    => TWITTER_ENV['token'],
+                         :consumer_secret => TWITTER_ENV['secret'],
+                         :access_key      => TWITTER_ENV['atoken'],
+                         :access_secret   => TWITTER_ENV['asecret']
+                        }
+           )
   
   stream.each_command('ymlp', 'cntc.unsub?') do |cmd, sender|
     $stdout.print "Received command on twitter stream: `#{cmd.join(' ')}`\n"
     $stdout.flush
     
-    Command::YMLP.new(cmd[2], cmd[3], ymlp_env).run do |response|
+    Command::YMLP.new(cmd[2], cmd[3], YMLP_ENV).run do |response|
     
       $stdout.print "Received response from YMLP: \n#{response.inspect}\n"
       $stdout.flush
