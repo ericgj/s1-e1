@@ -1,0 +1,9 @@
+## Development round 2
+
+The goal here is to have a minimally working app.
+The following things are left to another day:
+
+- Configuration
+- Generalization of commands to other services
+- Deployment
+
