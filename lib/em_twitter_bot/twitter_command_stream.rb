@@ -8,7 +8,6 @@ class CommandStream
   TWITTER_TRACK_PATH = '/1/statuses/filter.json'
   TWITTER_TRACK_METHOD = 'POST'
   
-  attr_reader :unroutable_command_callback
   
   def command_callbacks
     @command_callbacks ||= {}
@@ -53,16 +52,16 @@ class CommandStream
           if command_callbacks.has_key?(command_key)
             command_callbacks[command_key].call(command, command_reply_to(opts))
           else
-            unroutable_command_callback.call(@json_item['text'], @json_item['user']['screen_name']) \
-             if unroutable_command_callback
+            @unroutable_command_callback.call(@json_item['text'], @json_item['user']['screen_name']) \
+             if @unroutable_command_callback
           end
         else
-          unparseable_command_callback.call(@json_item['text'], @json_item['user']['screen_name']) \
-           if unparseable_command_callback
+          @unparseable_command_callback.call(@json_item['text'], @json_item['user']['screen_name']) \
+           if @unparseable_command_callback
         end
       else
-        unaddressed_command_callback.call(@json_item['text'], @json_item['user']['screen_name']) \
-          if unaddressed_command_callback
+        @unaddressed_command_callback.call(@json_item['text'], @json_item['user']['screen_name']) \
+          if @unaddressed_command_callback
       end
     end
    
@@ -71,7 +70,7 @@ class CommandStream
   protected
   
   def reset_state
-    @command, @is_reply, @is_command, @command_reply_to = nil
+    @json_item, @command, @is_reply, @is_command, @command_reply_to = nil
   end
   
   def reply?
