@@ -10,5 +10,4 @@ Some basic questions have to be answered -
 2. Can I get the EM HTTP client working against Twitter?
 
 
-## Development round 2
 
