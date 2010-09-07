@@ -18,6 +18,8 @@ class CommandStream
     command_callbacks[args.flatten] = blk
   end
   
+  alias_method :route_command, :each_command
+  
   def unaddressed_command(&blk)
     @unaddressed_command_callback = blk
   end
