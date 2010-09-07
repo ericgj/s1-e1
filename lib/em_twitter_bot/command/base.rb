@@ -1,9 +1,9 @@
-require 'rubygems'
-require 'em-http-request'
 
 module Command
 class Base
 
+  require 'em-http-request'
+  
   class << self
     
     attr_reader :uri_proc, :head_proc, :query_proc, :body_proc

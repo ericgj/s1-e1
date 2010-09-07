@@ -1,10 +1,10 @@
-require 'rubygems'
-require 'twitter/json_stream'
-require 'json'
 
 module Twitter
 class CommandStream
 
+  require 'twitter/json_stream'
+  require 'json'
+  
   TWITTER_TRACK_PATH = '/1/statuses/filter.json'
   TWITTER_TRACK_METHOD = 'POST'
   

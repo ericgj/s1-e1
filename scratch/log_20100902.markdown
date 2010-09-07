@@ -15,7 +15,7 @@ As I see it there are three basic parts:
 
 ### The input piece
 
-One very basic question is what is the mechanism for reading the commands?  I do not want to poll if at all possible: I want to act on push notifications.  For one thing, Twitter has strict limits on polling, meaning replies are delayed.  For another, polling is lazy and probably contributes to global warming :).  So I looked at the Twitter Streaming API.
+One very basic question is what is the mechanism for reading the commands?  I do not want to poll if at all possible: I want to act on push notifications.  For one thing, Twitter has strict limits on polling, meaning replies are delayed.  For another, polling seems like a hack when you have other options, and probably contributes to global warming :).  So I looked at the Twitter Streaming API.
 
 Apparently the ability to receive push notifications for Direct Messages is in beta right now, see [here](http://thenextweb.com/socialmedia/2010/08/30/twitter-launches-site-streams-to-eliminate-rate-limits-for-tweets-about-you/).  This definitely seems meant for industrial strength apps using friending as a user model, but there are a lot of questions about security and anyway it's not open yet.  
 
