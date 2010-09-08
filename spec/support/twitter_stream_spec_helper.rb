@@ -1,114 +1,84 @@
 # invoke from specs like:
 #
-#   stub_twitter_stream           # stubs client and invokes dummy server
-#   stub_twitter_stream_client    # stubs just the client, server invoked in spec
-#   start_dummy_stream_server     # invokes the dummy server
+#   # binds Twitter::JSONStream.connect to passed host/port or default
+#       stub_twitter_stream_client 
 #
-#   dummy_stream_message          # 'bounce' a message from the dummy server
-
+#   # starts up dummy server and pushes test messages to internal queue
+#   # which will be pop'ed after receiving any request
+#       start_dummy_stream_server do |server|
+#         server.push example_json_message
+#         server.push another_example_json_message
+#       end
+#
+#   
 module TwitterStreamSpecHelper
   
   DEFAULT_HOST = 'localhost'
   DEFAULT_PORT = 443
-  DEFAULT_SERVER_PORT = 444
-  
-  def stub_twitter_stream(handler = nil, options = {})
-    stub_twitter_stream_client(options)
-    start_dummy_stream_server(handler, options)
-  end
-  
+
+  # note this doesn't work -- instead simply call #connect with the
+  # :host and :port you want to bind to
   def stub_twitter_stream_client(options = {})
-    host = options[:host] || DEFAULT_HOST
-    port = options[:port] || DEFAULT_PORT
+    options[:host] ||= DEFAULT_HOST
+    options[:port] ||= DEFAULT_PORT
     Twitter::JSONStream.should_receive(:connect).
      and_return(
-        Twitter::JSONStream.connect(:host => host, :port => port)
+        Twitter::JSONStream.connect(options)
      )
   end
   
-  def dummy_stream_message( json, options = {} )
-    host = options[:host] || DEFAULT_HOST
-    server_port = options[:server_port] || DEFAULT_SERVER_PORT
-    TwitterStreamSpecHelper::DummyStream.write(json, :host => host, :port => server_port)
+  def start_dummy_stream_server(*args, &blk)
+    args = args.flatten
+    options = args.last.respond_to?(:[]) ? args.pop : {}
+    args[0] ||= TwitterStreamSpecHelper::DummyStreamServer
+    options[:host] ||= DEFAULT_HOST
+    options[:port] ||= DEFAULT_PORT
+    args << options
+    EventMachine::start_server options[:host], options[:port], *args, &blk
   end
   
-  def start_dummy_stream_server(handler = nil, options = {}, &blk)
-    host = options[:host] || DEFAULT_HOST
-    port = options[:port] || DEFAULT_PORT
-    server_port = options[:server_port] || DEFAULT_SERVER_PORT
-    handler ||= TwitterStreamSpecHelper::EchoServer
-    EventMachine::start_server host, server_port, handler, options, blk
-  end
   
-  # packages and echoes a json message received on server_port to port
-  #
-  module EchoServer
-  end
+  module DummyStreamServer
   
-  # sends a json message to server_port and hangs up
-  # 
-  module DummyStream
-  end
-  
-end
-
-
-__END__
-
-module Dummy
-module Twitter
-class JSONStream
-
-  DEFAULT_HOST = 'localhost'
-  DEFAULT_PORT = 0
-  MAX_LINE_LENGTH = 1024*1024
-  
-  def connect(host = DEFAULT_HOST, port = DEFAULT_PORT)
-    connection = EventMachine.connect(host, port, self)
-    connection
-  end
-  
-  def each_item(&blk)
-    @each_item_callback = blk
-  end
-  
-  def post_init
-    reset_state
-  end
-
-  def unbind
-    receive_line(@buffer.flush) unless @buffer.empty?
-  end
-    
-  def receive_data data
-    begin
-      @buffer.extract(data).each do |line|
-        receive_line(line)
-      end
-    rescue Exception => e
-      puts "#{e.class}: " + [e.message, e.backtrace].flatten.join("\n\t")
-      close_connection
-      return
-    end
-  end  
-    
-  def receive_line ln
-    parse_stream_line ln
-  end
-  
-  def parse_stream_line ln
-    ln.strip!
-    unless ln.empty?
-      if ln[0,1] == '{'
-        @each_item_callback.call(ln) if @each_item_callback
+    # we don't care what the request is, just pop the 
+    # latest message from the queue if any --
+    # and only do it once per connection
+    def receive_data data
+      unless @sent_reply
+        #puts 'stream pop'
+        @stream.pop { |msg| send_response msg }
+        @sent_reply = true
       end
     end
-  end
-
-  def reset_state
-    @buffer  = BufferedTokenizer.new("\r", MAX_LINE_LENGTH)
-  end
+        
+    def initialize(*args, &blk)
+      args = args.flatten
+      @options = args.last.respond_to?(:[]) ? args.pop : {}
+      @stream_proc = blk if block_given?
+    end
     
+    def post_init
+      @stream = EM::Queue.new
+      @stream_proc.call(self) if @stream_proc
+    end
+    
+    def push(msg)
+      #puts 'stream push'
+      @stream.push(msg.is_a?(String) ? msg : JSON.dump(msg))
+    end
+
+    protected
+    
+    def send_response msg
+      data = []
+      data << "HTTP/1.1 200 OK"
+      data << "Content-type: application/json"
+      data << "\n\r"
+      
+      send_data (data.join("\n\r") + msg)
+    end
+    
+  end
+  
 end
-end
-end
+

@@ -49,15 +49,15 @@ class Twitter
       write_on_exit = true
     end
     
-    puts "Authorizing Twitter access..."
-    oauth = OAuth::Consumer.new(@config['token'], @config['secret'], :site => "http://twitter.com")
-    if @config['atoken'] && @config['asecret']
-    else
+    puts "Checking Twitter access..."
+    unless @config['atoken'] && @config['asecret']
+      puts "Authorizing Twitter access..."
+      oauth = OAuth::Consumer.new(@config['token'], @config['secret'], :site => "http://twitter.com")
       r = oauth.get_request_token
       puts r.token
       puts r.secret
       puts r.authorize_url
-      puts "Please access the url above"
+      puts "Please access the url above and click 'Accept'"
       print "> what was the PIN twitter provided you with? "
       pin = gets.chomp
       a = r.get_access_token(:oauth_verifier => pin)
