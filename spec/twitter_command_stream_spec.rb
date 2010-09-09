@@ -64,8 +64,18 @@ describe Twitter::CommandStream, ' callbacks' do
                })
   end
   
+  
+  #  Note each of these cases works assuming that the callbacks
+  #  will be fired within 1 second (before the event loop stops).
+  #
+  #  A better way of testing eventmachine code is outlined 
+  #  by Amman Gupta here, basically to run EM within a thread,
+  #  (sequentially) pause it, and wake it up within whatever asynchronous
+  #  callback function you want to test the state within:
+  #
+  #  http://groups.google.com/group/eventmachine/browse_thread/thread/a7afcd2ceafcfcad/4ae54190ed1f8daa?lnk=gst&q=testing&pli=1
+  #
   it 'should throw unaddressed command if tweet is only a mention' do
-    #stub_twitter_stream_client
     EM.run do
       start_dummy_stream_server(dummy_options) do |server|
         server.push tweet_mention
